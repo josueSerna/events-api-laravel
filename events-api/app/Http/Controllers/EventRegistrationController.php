@@ -57,17 +57,27 @@ class EventRegistrationController extends Controller
 
 
     public function cancel(Request $request, $eventId)
-    {
-        $userId = $request->header('user_id');
+{
+    $userId = $request->header('user_id');
 
-        $user = User::find($userId);
-        if (!$user) {
-            return response()->json(['message' => 'Usuario no encontrado'], 404);
-        }
-
-        $user->events()->detach($eventId);
-
-        return response()->json(['message' => 'Inscripción cancelada']);
+    $user = User::find($userId);
+    if (!$user) {
+        return response()->json(['message' => 'Usuario no encontrado'], 404);
     }
+
+    $event = Event::find($eventId);
+    if (!$event) {
+        return response()->json(['message' => 'Evento no encontrado'], 404);
+    }
+
+    
+    if (!$user->events->contains($eventId)) {
+        return response()->json(['message' => 'El usuario no está inscrito en este evento'], 400);
+    }
+
+    $user->events()->detach($eventId);
+
+    return response()->json(['message' => 'Inscripción cancelada correctamente']);
+}
 
 }
